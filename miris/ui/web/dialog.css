@@ -1,0 +1,350 @@
+/* Window-only additions. app.css supplies the tokens and controls. */
+
+body.dialog { padding: 16px; }
+body.dialog main section > * + * { margin-top: 12px; }
+
+body.dialog header {
+  margin-bottom: 14px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.row-end { justify-content: flex-end; }
+.row-end > button { flex: 0 0 auto; }
+
+.dest-logo { display: inline-flex; align-items: center; justify-content: center; max-width: 100%; }
+/* Heights are set per mark to match letter heights, not box heights: Miris is
+   one line and Playbook a two-line lockup, and equal boxes made the letters
+   read at different sizes. */
+.dest-logo svg, .dest-logo img {
+  height: 20px;
+  width: auto;
+  /* Keeps a mark clear of the glyphs above. A viewBox SVG letterboxes rather
+     than distorting. */
+  max-height: 40px;
+  max-width: 100%;
+  display: block;
+}
+.dest-logo--text { font-size: 14px; font-weight: 600; letter-spacing: -0.01em; color: inherit; text-align: center; line-height: 1.2; }
+.dest-card .dest-logo svg[viewBox="0 0 976 272"] { height: 20px; }
+input[value="playbook"] ~ .dest-logo svg { height: 30px; }
+input[value="evercast_presenter"] ~ .dest-logo img { height: 32px; }
+
+/* Dim the mark, not the card, so the "soon" pill stays readable. */
+.dest-card.is-soon { cursor: default; }
+.dest-card.is-soon .dest-logo { opacity: 0.4; }
+.dest-card.is-soon input { pointer-events: none; }
+
+/* The panes are absolutely positioned so only the active one gives the track
+   height, which the script sets. Height snaps while the content slides:
+   animating both makes the window, resized from the reported height, chase a
+   moving number.
+
+   Clipped only while sliding. A permanent overflow:hidden cut off the workspace
+   dropdown's menu, which opens below the last field through the track's edge. */
+.form-track {
+  position: relative;
+}
+.form-track.is-sliding {
+  overflow: hidden;
+}
+.form-step {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  transition: transform 220ms cubic-bezier(0.2, 0, 0.2, 1);
+}
+.form-track[data-step="destination"] #step-destination { transform: translateX(0); }
+.form-track[data-step="destination"] #step-details { transform: translateX(100%); }
+.form-track[data-step="details"] #step-destination { transform: translateX(-100%); }
+.form-track[data-step="details"] #step-details { transform: translateX(0); }
+/* Not visibility:hidden: the box stayed in layout and extended the scroll
+   area, a horizontal scrollbar a full pane wide plus a vertical one when the
+   hidden pane was the taller. */
+.form-step[aria-hidden="true"] {
+  pointer-events: none;
+  display: none;
+}
+.form-track.is-sliding .form-step { display: block; }
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 10px;
+  padding: 3px 6px 3px 3px;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  color: var(--dim);
+  font: inherit;
+  font-size: 12px;
+  cursor: default;
+}
+.btn-back:hover { background: var(--surface); color: var(--text); }
+.btn-back:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .form-step, .icon-btn, .tip { transition: none; }
+}
+
+/* The header's icon buttons share the primary button's hover fill so the
+   help and settings tiles behave as one set. */
+.header-actions { display: flex; align-items: center; gap: 4px; }
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background-color: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--dim);
+  cursor: default;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.icon-btn:hover, .icon-btn:focus-visible { background-color: var(--primary-hover); color: #fff; }
+.icon-btn:active { background-color: var(--primary); color: #fff; }
+.icon-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Drawn by the page: the engine's title tooltip appears the instant the
+   pointer arrives and offers no delay setting. */
+.tip {
+  position: fixed;
+  z-index: 40;
+  padding: 4px 8px;
+  font-size: 11px;
+  line-height: 1.4;
+  white-space: nowrap;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.tip.tip-shown { opacity: 1; }
+
+.check {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  cursor: default;
+}
+
+/* White rather than accent: the accent means "the thing you are about to do",
+   and a setting is not that. */
+.check input[type="checkbox"] {
+  appearance: none;
+  flex: none;
+  position: relative;
+  width: 15px;
+  height: 15px;
+  margin: 2px 0 0;
+  border: 1px solid var(--line-strong);
+  border-radius: 3px;
+  background: var(--bg);
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.check:hover input[type="checkbox"] { border-color: rgba(255, 255, 255, 0.3); }
+.check input[type="checkbox"]:checked {
+  background: #fff;
+  border-color: #fff;
+}
+.check input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4.5px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--bg);
+  border-width: 0 1.8px 1.8px 0;
+  transform: rotate(43deg);
+}
+.check input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.check small {
+  display: block;
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--dim);
+}
+
+.check-sub { margin-bottom: 12px; }
+.check input[type="checkbox"]:disabled { cursor: default; }
+
+/* Shown rather than typed: a text field invites a path that does not exist. */
+.folder-path {
+  margin: 0 0 8px;
+  padding: 7px 9px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--text);
+  word-break: break-word;
+}
+
+.advanced { margin-bottom: 4px; }
+.advanced > summary {
+  cursor: default;
+  list-style: none;
+  display: flex;
+  width: fit-content;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  font-size: 12px;
+  color: var(--dim);
+  user-select: none;
+}
+.advanced > summary::-webkit-details-marker { display: none; }
+.advanced > summary::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 4px solid currentColor;
+  border-top: 3.5px solid transparent;
+  border-bottom: 3.5px solid transparent;
+  transition: transform 120ms ease;
+}
+.advanced[open] > summary::before { transform: rotate(90deg) translateX(1px); }
+.advanced > summary:hover { color: var(--text); }
+.advanced > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+.advanced > .field { margin-top: 10px; }
+
+/* .publish-option zeroes its margin to sit tight inside #publishOptions; one
+   placed directly in the step needs the form's rhythm back. */
+body.dialog .form-step > .publish-option { margin-top: 10px; }
+
+/* The window clamps its height, so an expanded form scrolls and the page's
+   bottom padding does not read as the end of it. */
+body.dialog .form-step > .row-end { margin-bottom: 8px; }
+
+.advanced > #advancedOptions { margin-top: 10px; }
+
+/* ---------- lighting picker ---------- */
+
+.env-field .env-label { display: flex; align-items: center; gap: 6px; }
+.env-trigger .dropdown-label { flex: 1; }
+.env-stack { display: flex; flex: none; }
+/* Chosen environments overlap like prints on a table, so the choice reads
+   with the popover shut. */
+.env-mini {
+  width: 28px;
+  height: 14px;
+  border-radius: 3px;
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: 0 0 0 1.5px var(--bg);
+}
+.env-mini + .env-mini { margin-left: -12px; }
+.env-mini img, .env-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.env-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  padding: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  z-index: 30;
+  animation: page-in 0.1s ease;
+}
+.env-picker.drop-up .env-popover { top: auto; bottom: calc(100% + 4px); }
+
+.env-filter {
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 9px;
+  font: inherit;
+}
+.env-filter:focus { border-color: var(--accent); outline: none; }
+.env-filter::-webkit-search-cancel-button { filter: invert(0.7); }
+
+.env-scroll { margin-top: 6px; overflow-y: auto; padding: 2px; }
+
+.env-group { margin: 12px 2px 6px; font-size: 11px; color: var(--dim); }
+
+.env-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px 5px; }
+/* Clipped at the tile: Painter's web engine let a long name run out of a
+   button into the next tile, though ellipsis worked in a newer Chromium. */
+.env-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--dim);
+  font: inherit;
+  font-size: 10.5px;
+  text-align: left;
+}
+.env-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--bg);
+  outline: 1px solid var(--line);
+  outline-offset: -1px;
+}
+.env-add .env-thumb { background: none; outline-style: dashed; outline-color: var(--line-strong); }
+.env-add:hover .env-thumb { outline-color: var(--dim); }
+.env-remove {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  display: none;
+  width: 16px;
+  height: 16px;
+  padding: 3px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.65);
+}
+.env-remove svg { display: block; width: 100%; height: 100%; fill: none; stroke: var(--text); stroke-width: 3; stroke-linecap: round; }
+.env-remove:hover { background: rgba(0, 0, 0, 0.9); }
+.env-tile:hover .env-remove, .env-tile:focus-visible .env-remove { display: block; }
+.env-name {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 1px;
+}
+.env-tile:hover { color: var(--text); }
+.env-tile:hover .env-thumb { outline-color: var(--line-strong); }
+/* Selection sits inside the image edge, focus outside it, so both can show. */
+.env-tile[aria-selected="true"] { color: var(--text); }
+.env-tile[aria-selected="true"] .env-thumb { outline: 2px solid var(--accent); outline-offset: -2px; }
+.env-tile:focus-visible { outline: none; }
+.env-tile:focus-visible .env-thumb { box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--accent); }
+
+.env-empty { padding: 12px 2px; font-size: 12px; color: var(--dim); }
+.env-hint { margin-top: 8px; font-size: 11px; color: var(--dim); }
