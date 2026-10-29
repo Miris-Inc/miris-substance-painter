@@ -3,6 +3,8 @@
 The Miris publish plugin for Adobe Substance 3D Painter: its source code, and
 installers for every release.
 
+> **Beta:** The plugin is in beta, so expect changes between releases.
+
 **[Download the latest release](https://github.com/Miris-Inc/miris-substance-painter/releases/latest)**
 
 - macOS: `miris-substance-painter-<version>.pkg` (signed and notarized)
