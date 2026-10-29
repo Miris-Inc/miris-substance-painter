@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Miris</title>
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="dialog.css">
+<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+</head>
+<body class="dialog">
+
+<header>
+  <div class="brand">
+    <svg class="wordmark" viewBox="0 0 976 272" aria-label="Miris">
+      <path fill="currentColor" d="M920 152h-32c-8.82 0-16-7.18-16-16s7.18-16 16-16h72V88h-72c-26.47 0-48 21.53-48 48s21.53 48 48 48h32c8.82 0 16 7.18 16 16s-7.18 16-16 16h-80v32h80c26.47 0 48-21.53 48-48s-21.53-48-48-48M784 88h32v160h-32zm-168 0h32v160h-32zM479.1 200h-14.2L392 24h-32v224h32V120h5.5l53.01 128h42.98l53.01-128h5.5v128h32V24h-32zM616 24h32v32h-32zm168 0h32v32h-32zm-64.12 68.94L712 112l-9.94-24H680v160h32V136c0-8.84 7.16-16 16-16h36V88h-36.72c-3.24 0-6.16 1.96-7.4 4.94M114.51 264h42.98L184 200H88zm44.35-176L192 8H80l33.14 80zM184 200h80V72h-26.98zM8 72v128h80L34.98 72z"/>
+    </svg>
+    <span class="dest-pill">beta</span>
+    <button type="button" class="info-tip" title="The Miris platform is in beta. If you run into any issues, please reach out to support@miris.com for help."></button>
+  </div>
+  <div class="header-actions">
+    <button id="helpBtn" class="icon-btn" type="button" data-tip="Support" aria-label="Help">
+      <svg viewBox="0 0 24 24" aria-hidden="true" width="20" height="20" fill="none"
+           stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M9.6 9.4a2.5 2.5 0 1 1 3.6 2.3c-.7.35-1.2.9-1.2 1.7v.3"/>
+        <circle cx="12" cy="16.9" r=".6" fill="currentColor" stroke-width="1"/>
+      </svg>
+    </button>
+    <button id="settingsBtn" class="icon-btn" type="button" data-tip="Settings"
+            aria-label="Settings">
+      <svg viewBox="0 0 16 16" aria-hidden="true" width="15" height="15">
+        <path fill="none" stroke="currentColor" stroke-width="1.4"
+              d="M8 10.2a2.2 2.2 0 1 0 0-4.4 2.2 2.2 0 0 0 0 4.4Z"/>
+        <path fill="none" stroke="currentColor" stroke-width="1.4"
+              stroke-linejoin="round"
+              d="M12.9 9.7a1.1 1.1 0 0 0 .22 1.21l.04.04a1.33 1.33 0 1 1-1.88 1.88l-.04-.04a1.1 1.1 0 0 0-1.21-.22 1.1 1.1 0 0 0-.67 1v.11a1.33 1.33 0 0 1-2.66 0v-.06a1.1 1.1 0 0 0-.72-1 1.1 1.1 0 0 0-1.21.22l-.04.04a1.33 1.33 0 1 1-1.88-1.88l.04-.04a1.1 1.1 0 0 0 .22-1.21 1.1 1.1 0 0 0-1-.67h-.11a1.33 1.33 0 1 1 0-2.66h.06a1.1 1.1 0 0 0 1-.72 1.1 1.1 0 0 0-.22-1.21l-.04-.04a1.33 1.33 0 1 1 1.88-1.88l.04.04a1.1 1.1 0 0 0 1.21.22h.05a1.1 1.1 0 0 0 .67-1v-.11a1.33 1.33 0 0 1 2.66 0v.06a1.1 1.1 0 0 0 .67 1 1.1 1.1 0 0 0 1.21-.22l.04-.04a1.33 1.33 0 1 1 1.88 1.88l-.04.04a1.1 1.1 0 0 0-.22 1.21v.05a1.1 1.1 0 0 0 1 .67h.11a1.33 1.33 0 1 1 0 2.66h-.06a1.1 1.1 0 0 0-1 .67Z"/>
+      </svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+<section id="page-form" hidden>
+  <div id="notice" class="notice" data-tone="note" hidden>
+    <span id="noticeText" class="notice-text"></span>
+    <button id="noticeDismiss" class="notice-dismiss" type="button" title="Dismiss" aria-label="Dismiss"><svg viewBox="0 0 16 16" aria-hidden="true" width="12" height="12"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M4 4l8 8M12 4l-8 8"/></svg></button>
+  </div>
+  <div class="form-track" data-step="destination">
+  <div class="form-step" id="step-destination">
+  <fieldset class="field destination">
+    <legend>Destination</legend>
+    <!-- Built at runtime from catalog.json. -->
+    <div class="dest-cards" role="radiogroup" aria-label="Destination"></div>
+  </fieldset>
+  </div>
+
+  <div class="form-step" id="step-details" aria-hidden="true">
+    <button id="backBtn" class="btn-back" type="button">
+      <svg viewBox="0 0 16 16" aria-hidden="true" width="12" height="12">
+        <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+              stroke-linejoin="round" d="M10 3 5 8l5 5"/>
+      </svg>
+      Destination
+    </button>
+    <p id="destNote" class="dest-note"></p>
+
+  <label class="field" id="nameField">
+    <span>Asset name</span>
+    <input id="assetName" type="text" autocomplete="off" spellcheck="false">
+  </label>
+  <label class="field" id="tagsField" for="tagInput">
+    <span>Tags</span>
+    <div id="tagBox" class="tag-box"><input id="tagInput" type="text" placeholder="Add tag…" autocomplete="off" spellcheck="false"></div>
+  </label>
+  <div class="field" id="workspaceField">
+    <span>Workspace</span>
+    <div id="workspaceDropdown"></div>
+    <p id="workspaceNote" class="dest-note" hidden></p>
+  </div>
+  <div class="field" id="publishOptions" hidden></div>
+
+  <!-- Same markup as buildPublishOptions. The tip is a real button inside the
+       label: interactive content does not forward a click to the labelled
+       control, so clicking the hint does not toggle the checkbox. -->
+  <label class="publish-option" id="keepExportsField">
+    <input id="keepExports" type="checkbox">
+    <span class="publish-option-label">Keep exported files</span>
+    <button type="button" class="info-tip" title="Exports stay on disk instead of a temporary folder that is deleted. Full resolution textures, and nothing cleans them up."></button>
+  </label>
+
+  <details class="advanced" id="advanced">
+    <summary>Advanced</summary>
+    <div class="field" id="unitField">
+      <span>1 unit =</span>
+      <div id="unitDropdown"></div>
+    </div>
+    <div id="advancedOptions" hidden></div>
+  </details>
+  <div class="row row-end">
+    <button id="cancelBtn" class="btn-secondary">Cancel</button>
+    <button id="publishBtn" class="btn-primary">
+      <span id="publishLabel">Publish</span>
+    </button>
+  </div>
+  </div>
+  </div>
+</section>
+
+<section id="page-settings" hidden>
+  <button id="settingsBackBtn" class="btn-back" type="button">
+    <svg viewBox="0 0 16 16" aria-hidden="true" width="12" height="12">
+      <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"
+            stroke-linejoin="round" d="M10 3 5 8l5 5"/>
+    </svg>
+    Back
+  </button>
+
+  <div id="exportFolderRow" class="field">
+    <label class="check check-sub">
+      <input id="revealExports" type="checkbox">
+      <span>
+        Open the folder when a publish ends
+        <small>Shows the kept files in the file browser, after a success and
+          after a failure alike.</small>
+      </span>
+    </label>
+    <span>Folder</span>
+    <p id="exportFolderPath" class="folder-path"></p>
+    <div class="row row-end">
+      <button id="resetFolderBtn" class="btn-secondary" type="button" hidden>
+        Use default
+      </button>
+      <button id="chooseFolderBtn" class="btn-secondary" type="button">
+        Change
+      </button>
+    </div>
+  </div>
+</section>
+
+<section id="page-publishing" hidden>
+  <p id="stageLine"></p>
+  <div class="track"><div id="progressFill" class="fill"></div></div>
+  <p id="bytesLine" class="dim small"></p>
+  <button id="cancelPublishBtn" class="btn-secondary">Cancel</button>
+</section>
+
+<section id="page-done" hidden>
+  <p id="doneLine" class="dim">Published.</p>
+  <div class="link-wrap">
+    <div id="shareUrl" class="link-box"></div>
+    <div class="link-actions">
+      <button id="openBtn" class="btn-icon" title="Open in browser">
+        <svg viewBox="0 0 24 24" class="ic"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+      </button>
+      <button id="copyBtn" class="btn-icon copy-overlay" title="Copy link">
+        <svg viewBox="0 0 24 24" class="ic ic-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+        <svg viewBox="0 0 24 24" class="ic ic-check"><path d="M20 6 9 17l-5-5"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="row row-end">
+    <button id="closeBtn" class="btn-secondary">Close</button>
+  </div>
+</section>
+
+</main>
+
+<script src="dropdown.js"></script>
+<script src="environments.js"></script>
+<script src="dialog.js"></script>
+</body>
+</html>

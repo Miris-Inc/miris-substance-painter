@@ -1,0 +1,542 @@
+/* Miris: tokens from the portal ramp; accent appears only in the
+   progress fill, focus rings, and the selected destination. */
+:root {
+  --bg: #1c1c1f;
+  --surface: #232326;
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.14);
+  --text: #e8e8ea;
+  --dim: #9a9ca4;
+  --accent: #ff3500;
+  /* portal status palette (tailwind.css dark-theme dot values) */
+  --status-streamable: #33cc61;  /* success-500 */
+  --status-processing: #ff9f40;  /* warning-500 */
+  --status-error: #f26d6d;
+  --status-error-wash: rgba(242, 109, 109, 0.09);
+  --primary: #131316;
+  --primary-hover: #252529;
+}
+
+* { box-sizing: border-box; margin: 0; }
+
+/* The hidden attribute must always win: author display rules (grid/flex on
+   lists, buttons, badges) otherwise override the UA's display: none. */
+[hidden] { display: none !important; }
+
+/* ---------- scrollbars (Chromium) ---------- */
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 4px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.28);
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-corner { background: transparent; }
+
+body {
+  scrollbar-gutter: stable;
+  background: var(--bg);
+  color: var(--text);
+  font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding: 14px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.wordmark { height: 15px; width: auto; color: #fff; display: block; }
+.brand { display: flex; align-items: center; gap: 8px; }
+
+/* ---------- bespoke dropdown ---------- */
+
+.dropdown { position: relative; }
+.dropdown-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 9px;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+.dropdown-btn:hover { border-color: var(--line-strong); }
+/* Locked: only a new sign-in can change it. */
+.dropdown-btn:disabled { color: var(--dim); background: var(--surface); border-color: var(--line); cursor: default; }
+.dropdown-btn:disabled:hover { border-color: var(--line); }
+.dropdown-btn:disabled .chev { display: none; }
+.dropdown.open .dropdown-btn { border-color: var(--accent); }
+.dropdown-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.chev {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  fill: none;
+  stroke: var(--dim);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.12s ease;
+}
+.dropdown.open .chev { transform: rotate(180deg); }
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  max-height: 180px;
+  overflow-y: auto;
+  z-index: 30;
+  animation: page-in 0.1s ease;
+}
+/* Set by dropdown.js when there is not enough window below the button. */
+.dropdown.drop-up .dropdown-menu {
+  top: auto;
+  bottom: calc(100% + 4px);
+}
+.dropdown-menu li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.dropdown-menu li:hover, .dropdown-menu li.active { background: rgba(255, 255, 255, 0.07); }
+.dropdown-menu li span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dropdown-menu .check {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  visibility: hidden;
+}
+.dropdown-menu li[aria-selected="true"] .check { visibility: visible; }
+
+main section { animation: page-in 0.16s ease; }
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(3px); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  main section, body.dialog .dest-indicator { animation: none !important; }
+}
+
+/* .form-step is listed because the form's children moved inside one; without
+   it every gap in the second step collapsed. */
+section > * + *,
+.form-step > * + * { margin-top: 10px; }
+
+.dim { color: var(--dim); }
+.small { font-size: 11px; }
+.status { color: var(--dim); font-size: 12px; min-height: 1em; user-select: text; -webkit-user-select: text; }
+.status:empty { display: none; }
+/* ---------- controls ---------- */
+
+button { font: inherit; cursor: pointer; }
+
+.btn-primary, .btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border: 1px solid var(--line-strong);
+}
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-primary:active { background: #000; }
+.btn-primary:disabled {
+  background: var(--surface);
+  color: var(--dim);
+  border-color: transparent;
+  cursor: default;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #d6d8de;
+  border: 1px solid var(--line-strong);
+}
+.btn-secondary:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
+.btn-secondary:active { background: rgba(255, 255, 255, 0.03); }
+
+.btn-icon {
+  background: transparent;
+  border: none;
+  border-radius: 5px;
+  padding: 4px;
+  color: var(--dim);
+  display: inline-flex;
+}
+.btn-icon:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.btn-icon:disabled { opacity: 0.35; cursor: default; }
+.btn-icon:disabled:hover { background: transparent; color: var(--dim); }
+
+.btn-icon svg, .ic { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+button:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.field { display: block; }
+/* direct child only: .dropdown-label inside a field must not inherit this */
+.field > span { display: block; font-size: 11px; color: var(--dim); margin-bottom: 4px; }
+input[type="text"], select {
+  width: 100%;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 9px;
+  font: inherit;
+}
+input[type="text"]:focus, select:focus { border-color: var(--accent); outline: none; }
+
+/* ---------- tags ---------- */
+
+.tag-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 5px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  cursor: text;
+}
+.tag-box:focus-within { border-color: var(--accent); }
+/* Portal Tag.vue (sm, dark): squarish radius, neutral-700 surface,
+   neutral-300 text, 72% neutral-400 border. */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: #252529;
+  color: #9a9ca4;
+  border: 1px solid rgba(130, 132, 140, 0.72);
+  font-size: 11px;
+  line-height: 1;
+  padding: 4px 2px 4px 8px;
+  border-radius: 4px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.chip button {
+  background: none;
+  border: none;
+  color: var(--dim);
+  cursor: pointer;
+  font-size: 13px;
+  line-height: 1;
+  padding: 1px 6px;
+}
+.chip button:hover { color: #fff; }
+#tagInput {
+  flex: 1;
+  min-width: 72px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font: inherit;
+  padding: 3px 4px;
+}
+#tagInput:focus { outline: none; }
+
+/* ---------- publishing ---------- */
+
+.track {
+  height: 6px;
+  background: var(--surface);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  width: 0;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.25s ease;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- done ---------- */
+
+.link-wrap { position: relative; }
+.link-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  word-break: break-all;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.link-wrap .link-box { padding-right: 60px; }
+.link-actions {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  gap: 2px;
+  background: var(--surface);
+}
+.copy-overlay .ic-check { display: none; stroke: var(--status-streamable); }
+.copy-overlay.copied .ic-copy { display: none; }
+.copy-overlay.copied .ic-check { display: block; }
+.row { display: flex; gap: 8px; }
+.row > button { flex: 1; }
+
+/* Cards rather than a dropdown so every option reads without a click. Square
+   because the marks are different shapes and a square favours none of them.
+   The accent is a border, not a fill: inside Painter's chrome a solid accent
+   block reads as an alert. */
+body.dialog .destination {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+body.dialog .destination legend {
+  font-size: 11px;
+  color: var(--dim);
+  margin-bottom: 4px;
+  padding: 0;
+}
+body.dialog .dest-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+body.dialog .dest-card {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1 / 1;
+  padding: 26px 12px 18px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--text);
+  cursor: default;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+body.dialog .dest-card.is-soon { color: var(--dim); }
+body.dialog .dest-card input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+body.dialog .dest-card:not(.is-soon):hover { background: var(--surface); border-color: var(--line-strong); }
+body.dialog .dest-card.is-focused {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------- the state glyph, top left ---------- */
+
+body.dialog .dest-indicator {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  box-sizing: border-box;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line-strong);   /* signed out: an empty ring */
+  background: transparent;
+}
+body.dialog .dest-indicator[data-state="ready"] {
+  border-color: var(--status-streamable);
+  background: var(--status-streamable);      /* signed in: a filled disc */
+}
+body.dialog .dest-indicator[data-state="working"] {
+  border-color: var(--line);
+  border-top-color: var(--status-processing);
+  animation: spin 0.9s linear infinite;
+}
+/* A card that cannot be chosen says so where the glyph would be. The same pill
+   marks the platform as beta beside the wordmark. */
+body.dialog .dest-pill,
+body.dialog .dest-indicator[data-state="soon"] {
+  width: auto;
+  height: auto;
+  padding: 1px 7px 2px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 9.5px;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: var(--dim);
+  animation: none;
+}
+
+/* ---------- the way out, top right ---------- */
+
+body.dialog .dest-signout {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  color: var(--dim);
+  background: none;
+  border: 0;
+  border-radius: 5px;
+  cursor: default;
+}
+body.dialog .dest-signout:hover { color: var(--text); background: var(--surface-2, var(--surface)); }
+body.dialog .dest-signout:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* ---------- the notice at the top of the form ---------- */
+
+body.dialog .notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 8px 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--surface);
+}
+body.dialog .notice[data-tone="error"] {
+  color: var(--status-error);
+  background: var(--status-error-wash);
+}
+body.dialog .notice-text { flex: 1; min-width: 0; user-select: text; -webkit-user-select: text; }
+body.dialog .notice-dismiss {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  color: inherit;
+  opacity: 0.6;
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  cursor: default;
+}
+body.dialog .notice-dismiss:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
+body.dialog .notice-dismiss:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+body.dialog .publish-option { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 12px; color: var(--text); cursor: default; }
+/* The native control draws in the platform accent, a third colour here. */
+body.dialog .publish-option input {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  background: transparent;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 4px;
+  cursor: default;
+  transition: background 100ms ease, border-color 100ms ease;
+}
+body.dialog .publish-option:hover input { border-color: var(--dim); }
+body.dialog .publish-option input { position: relative; }
+body.dialog .publish-option input:checked { background: var(--text); border-color: var(--text); }
+body.dialog .publish-option input:checked::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 8px;
+  border: solid var(--bg);
+  border-width: 0 2px 2px 0;
+  /* Centred by transform, so the border width cannot push it off centre. */
+  transform: translate(-50%, -60%) rotate(45deg);
+}
+body.dialog .publish-option input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+body.dialog .publish-option.is-gated { color: var(--dim); }
+body.dialog .publish-option.is-gated input { border-color: var(--line); }
+/* Under the row rather than in the tip, so it reads without hovering. */
+body.dialog .publish-caution { margin: 4px 0 8px 24px; }
+
+/* The "i" is drawn here so the button stays empty and its title is the
+   accessible name. */
+body.dialog .info-tip {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  padding: 0;
+  border: 1px solid var(--dim);
+  border-radius: 50%;
+  background: none;
+  color: var(--dim);
+  font-size: 9px;
+  font-style: italic;
+  font-family: Georgia, "Times New Roman", serif;  /* a serif i reads as an i at 9px */
+  line-height: 11px;
+  cursor: help;
+}
+body.dialog .info-tip::before { content: "i"; }
+body.dialog .info-tip:hover { border-color: var(--text); color: var(--text); }
+body.dialog .info-tip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+body.dialog .dest-note {
+  margin: 6px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--dim);
+  min-height: 15px;  /* holds its line so the form does not jump on change */
+}
+@media (prefers-reduced-motion: reduce) {
+  body.dialog .dest-card { transition: none; }
+}
+
+/* Match the fields around it rather than the window behind them. */
+body.dialog .dropdown-btn { background: var(--surface); }
