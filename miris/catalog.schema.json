@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://miris.com/schemas/substance-painter/catalog.schema.json",
+  "title": "Destination catalog, version 2",
+  "type": "object",
+  "required": ["schema_version", "integrations"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "const": 2 },
+    "integrations": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/destination" }
+    }
+  },
+  "$defs": {
+    "destination": {
+      "type": "object",
+      "required": ["id", "title", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_-]*$" },
+        "title": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["available", "soon", "disabled", "hidden"] },
+        "status_message": { "type": ["string", "null"] },
+        "logo": { "oneOf": [{ "$ref": "#/$defs/logo" }, { "type": "null" }] },
+        "help_url": { "type": "string", "pattern": "^https://" },
+        "auth": { "$ref": "#/$defs/auth" },
+        "upload": { "$ref": "#/$defs/upload" },
+        "formats": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "publish_options": { "type": "array", "items": { "$ref": "#/$defs/publish_option" } },
+        "production_hosts": {
+          "type": "object",
+          "required": ["auth", "upload"],
+          "additionalProperties": false,
+          "properties": {
+            "auth": { "type": "string", "pattern": "^https://" },
+            "upload": { "type": "string", "pattern": "^https://" }
+          }
+        },
+        "capabilities": {
+          "type": "object",
+          "required": ["tags", "share_link", "workspaces"],
+          "additionalProperties": false,
+          "properties": {
+            "tags": { "type": "boolean" },
+            "share_link": { "type": "boolean" },
+            "workspaces": { "type": "boolean" }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "available" } } },
+          "then": { "required": ["description", "auth", "upload", "formats", "capabilities", "production_hosts"] },
+          "else": { "required": ["status_message"], "properties": { "status_message": { "type": "string", "minLength": 1 } } }
+        }
+      ]
+    },
+    "logo": {
+      "type": "object",
+      "required": ["lockup", "aspect"],
+      "additionalProperties": false,
+      "properties": {
+        "lockup": { "enum": ["horizontal", "stacked"] },
+        "aspect": { "type": "number", "exclusiveMinimum": 0 },
+        "svg": { "type": "string", "pattern": "^<svg[^>]*viewBox" },
+        "file": { "type": "string", "pattern": "^logos/[A-Za-z0-9._-]+\\.(png|svg)$" }
+      },
+      "oneOf": [{ "required": ["svg"] }, { "required": ["file"] }]
+    },
+    "auth": {
+      "type": "object",
+      "required": ["mechanism", "host", "endpoints"],
+      "properties": {
+        "mechanism": { "type": "string", "minLength": 1 },
+        "host": { "type": "string", "minLength": 1 },
+        "endpoints": { "type": "object", "additionalProperties": { "type": "string" } }
+      }
+    },
+    "upload": {
+      "type": "object",
+      "required": ["engine", "host", "endpoints", "options"],
+      "additionalProperties": false,
+      "properties": {
+        "engine": { "type": "string", "minLength": 1 },
+        "host": { "type": "string", "minLength": 1 },
+        "endpoints": { "type": "object", "additionalProperties": { "type": "string" } },
+        "options": { "type": "object" }
+      }
+    },
+    "publish_option": {
+      "type": "object",
+      "required": ["id", "label", "type", "help"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "label": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["checkbox", "environments"] },
+        "default": { "type": "boolean" },
+        "help": { "type": "string", "minLength": 1 },
+        "requires": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "caution": { "type": "string", "minLength": 1 },
+        "advanced": { "type": "boolean" }
+      }
+    }
+  }
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>About Miris</title>
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="about.css">
+</head>
+<body class="about">
+
+<header class="about-head">
+  {{wordmark}}
+</header>
+
+<main>
+  <h1 class="about-title">{{title}}</h1>
+  <p class="about-version">Version {{version}}</p>
+  <p class="about-desc">{{description}}</p>
+
+  <dl class="about-facts">
+    <dt>Miris</dt><dd>{{host}} <span class="about-note">{{host_note}}</span></dd>
+    <dt>Painter</dt><dd>{{painter}}</dd>
+    <dt>Python</dt><dd>{{python}}</dd>
+    <dt>Qt</dt><dd>{{qt}}</dd>
+    <dt>System</dt><dd>{{platform}}</dd>
+  </dl>
+
+  <p class="about-links">
+    <a href="{{docs_url}}">Documentation</a>
+    <a href="{{website}}">miris.com</a>
+  </p>
+
+  <footer class="about-foot">
+    <span>{{copyright}}</span>
+    <span>{{licence}}</span>
+  </footer>
+</main>
+
+</body>
+</html>
