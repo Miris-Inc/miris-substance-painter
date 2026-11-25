@@ -18,6 +18,9 @@ from .version import USER_AGENT
 
 _SNIPPET = 240
 
+# The latest Miris-Config response header; telemetry reads its endpoint from it.
+miris_config = ""
+
 
 class ApiError(Exception):
     pass
@@ -117,6 +120,7 @@ def request(
 ) -> bytes:
     """`tolerate` names statuses whose body is an answer, not a failure: an
     RFC 8628 poll says "still waiting" with a 400."""
+    global miris_config
     if query:
         url += ("&" if "?" in url else "?") + urllib.parse.urlencode(query)
     sent = {"Accept": "application/json", "User-Agent": USER_AGENT}
@@ -130,6 +134,7 @@ def request(
         with _OPENER.open(req, timeout=timeout) as response:
             if response.status in (301, 302, 303, 307, 308):
                 raise AuthError("the session was not accepted")
+            miris_config = response.headers.get("Miris-Config") or miris_config
             return response.read()
     except urllib.error.HTTPError as error:
         body = error.read()

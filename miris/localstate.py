@@ -78,6 +78,28 @@ def reveal_exports(path: Path | None = None) -> bool:
     return True if value is None else bool(value)
 
 
+def usage_path() -> Path:
+    return config.state_dir() / "usage.json"
+
+
+def usage_choice(path: Path | None = None) -> bool | None:
+    """The person's answer to sharing usage data, or None until they give one."""
+    try:
+        value = json.loads((path or usage_path()).read_text()).get("share_usage")
+    except (OSError, ValueError, AttributeError):
+        return None
+    return value if isinstance(value, bool) else None
+
+
+def share_usage(path: Path | None = None) -> bool:
+    """Opt-in: off until the person chooses to share."""
+    return usage_choice(path) is True
+
+
+def set_share_usage(on: bool, path: Path | None = None) -> None:
+    write_private(path or usage_path(), json.dumps({"share_usage": on}))
+
+
 EXPORTS_FOLDER = "Miris"
 PAINTER_FOLDER = ("Adobe", "Adobe Substance 3D Painter")
 PAINTER_EXPORT_FOLDER = "export"

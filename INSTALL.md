@@ -20,7 +20,9 @@ Use the `.pkg` on macOS or `.exe` on Windows:
    **Settings → Apps** first. Your sign-in and preferences are stored separately
    and remain.
 2. Open the installer and follow its steps. It installs for your current user
-   only; other accounts on the same machine install separately.
+   only; other accounts on the same machine install separately. The first
+   time you open Miris → Publish, the plugin asks whether to share anonymous
+   usage data; see [USAGE_DATA.md](USAGE_DATA.md).
    On Windows the default follows your actual Documents folder, including a
    redirected one. Change the destination only if Painter uses a custom plugins
    folder, and select its `miris` subfolder.
@@ -67,7 +69,17 @@ only:
 |---|---|
 | `miris_oauth.json` | your Miris tokens |
 | `playbook.json` | your Playbook tokens |
-| `ui_prefs.json` | window preferences and the export folder |
+| `ui_prefs.json` | window preferences, the export folder, and the usage install id |
+| `usage.json` | whether to share usage data |
+
+## What the plugin sends
+
+**Usage data.** Only if you choose to share. [USAGE_DATA.md](USAGE_DATA.md) lists exactly what is sent and how to turn it off.
+
+**Update check.** The first time the publish window opens in a Painter session,
+the plugin asks GitHub for the latest release, so it can tell you when a newer
+version is out. GitHub sees your IP address and the plugin version, and nothing
+else is sent.
 
 ## Uninstall
 

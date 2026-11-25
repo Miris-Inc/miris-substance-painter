@@ -22,7 +22,17 @@ from PySide6 import (
     QtWidgets,
 )
 
-from .. import config, connectors, destinations, exporter, hdri, localstate, usdz
+from .. import (
+    config,
+    connectors,
+    destinations,
+    exporter,
+    hdri,
+    localstate,
+    telemetry,
+    updates,
+    usdz,
+)
 from ..api import AuthError
 from . import branding
 from .connection import ConnectionManager
@@ -50,6 +60,10 @@ def log_exception(context):
     import traceback
 
     log(f"{context}:\n{traceback.format_exc()}", error=True)
+
+
+def _click(control):
+    telemetry.track("interaction", "click", control=control, view="publish-window")
 
 
 def _reveal(directory: Path) -> None:
@@ -89,11 +103,13 @@ class _Bridge(QtCore.QObject):
     @QtCore.Slot(str, str, str, str, str)
     @guard
     def publish(self, asset_name, tags_json, destination, options_json, unit_id):
+        _click("publish")
         self._w._start_publish(asset_name, tags_json, destination, options_json, unit_id)
 
     @QtCore.Slot(str)
     @guard
     def signIn(self, destination):
+        _click("sign-in")
         self._w._connections.sign_in(destination)
 
     @QtCore.Slot(str)
@@ -125,6 +141,7 @@ class _Bridge(QtCore.QObject):
     @QtCore.Slot()
     @guard
     def cancelPublish(self):
+        _click("cancel-publish")
         self._w._cancel_requested = True
         self._w._cancel_pending_export()
 
@@ -150,6 +167,7 @@ class _Bridge(QtCore.QObject):
             {
                 "keepExports": localstate.keep_exports(),
                 "revealExports": localstate.reveal_exports(),
+                "shareUsage": localstate.share_usage(),
                 "exportRoot": str(localstate.export_root()),
                 "defaultRoot": str(localstate.painter_export_dir()),
             }
@@ -164,6 +182,13 @@ class _Bridge(QtCore.QObject):
     @guard
     def setRevealExports(self, on):
         localstate.save_pref("reveal_exports", bool(on))
+
+    @QtCore.Slot(bool)
+    @guard
+    def setShareUsage(self, on):
+        # Answered for this window even if the write below fails, so the form is never blocked.
+        self._w._set(usageAsked=True)
+        localstate.set_share_usage(bool(on))
 
     @QtCore.Slot(result=str)
     @guard
@@ -237,6 +262,7 @@ class _Bridge(QtCore.QObject):
     @QtCore.Slot(str)
     @guard
     def copyLink(self, text):
+        _click("copy-link")
         clipboard = QtWidgets.QApplication.clipboard()
         if clipboard is None:  # the page has already shown a "copied" tick
             raise RuntimeError("no clipboard available")
@@ -248,6 +274,7 @@ class _Bridge(QtCore.QObject):
         if not url.startswith(("http://", "https://")):
             log(f"refusing to open {url!r}", error=True)
             return
+        _click("open-link")
         webbrowser.open(url)
 
 
@@ -312,6 +339,8 @@ class PublishWindow(QtWidgets.QDialog):
             "shareUrl": "",
             "doneMessage": "",
             "auth": {},
+            "update": None,
+            "usageAsked": False,
         }
 
         self.bridge = _Bridge(self)
@@ -341,6 +370,19 @@ class PublishWindow(QtWidgets.QDialog):
 
         self._stage_changed.connect(lambda text: self._set(stage=text))
         self._bytes_changed.connect(self._on_bytes)
+
+        self._spawn(
+            updates.newer_release,
+            self._on_update_checked,
+            lambda exc: log(f"update check failed: {exc}"),
+        )
+
+    def _on_update_checked(self, release):
+        if release is None:
+            return
+        log(f"Miris {release['version']} is available: {release['url']}")
+        telemetry.track("lifecycle", "update-available", latestVersion=release["version"])
+        self._set(update=release)
 
     def _fit_height(self, content_px):
         if content_px <= 0:
@@ -414,6 +456,7 @@ class PublishWindow(QtWidgets.QDialog):
         self._set(
             page="form",
             keepExports=localstate.keep_exports(),
+            usageAsked=localstate.usage_choice() is not None,
             unitChoices=exporter.unit_choices(),
             unitId="cm",
             assetName=asset_name,
@@ -629,6 +672,7 @@ class PublishWindow(QtWidgets.QDialog):
             return
         except Exception as e:  # noqa: BLE001 (every failure must reach the window)
             log_exception("export failed")
+            telemetry.track("error", "error", code=f"export-{type(e).__name__}")
             self._cleanup_export()
             self._set(page="form", formMessage=f"Export failed: {e}", formTone="error")
             return
@@ -655,6 +699,13 @@ class PublishWindow(QtWidgets.QDialog):
         )
         if self._cancel_requested:
             raise connectors.Cancelled("upload cancelled by the user")
+        telemetry.track(
+            "interaction",
+            "export",
+            destination=self._destination,
+            format="usdz",
+            sizeBytes=archive.stat().st_size,
+        )
         return archive
 
     def _start_upload(self):
@@ -684,7 +735,7 @@ class PublishWindow(QtWidgets.QDialog):
                 )
 
         def upload_one(archive, name, tags, stage_prefix=""):
-            return connector.upload(
+            uploaded = connector.upload(
                 connectors.UploadRequest(
                     archive=archive,
                     asset_name=name,
@@ -697,6 +748,14 @@ class PublishWindow(QtWidgets.QDialog):
                     checkpoint=checkpoint,
                 )
             )
+            telemetry.track(
+                "interaction",
+                "upload",
+                destination=self._destination,
+                format="usdz",
+                sizeBytes=archive.stat().st_size,
+            )
+            return uploaded
 
         def work():
             if not variants:
@@ -761,6 +820,7 @@ class PublishWindow(QtWidgets.QDialog):
             connector.sign_out()
             self._push_auth()
         log(f"{self._destination} upload failed: {exc}", error=True)
+        telemetry.track("error", "error", code=f"upload-{type(exc).__name__}")
         detail = connector.upload_error(exc) if connector is not None else str(exc)
         self._set(page="form", formMessage=f"Publish failed{after}. {detail}", formTone="error")
 

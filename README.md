@@ -12,6 +12,11 @@ plugin ZIP, and a `release-manifest.json` with SHA-256 digests.
 Install instructions are in [INSTALL.md](INSTALL.md), which also ships inside
 the package.
 
+The plugin asks before it reports anonymous usage to Miris, and checks this
+repository for newer releases. [USAGE_DATA.md](USAGE_DATA.md) lists exactly what
+usage data is sent, and [INSTALL.md](INSTALL.md#what-the-plugin-sends) covers the
+update check.
+
 ## Source
 
 [`miris/`](miris) is the plugin from the release ZIP. Each new release tag points

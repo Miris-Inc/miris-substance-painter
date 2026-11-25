@@ -86,6 +86,8 @@ const startingSignIn = {};
 // The card whose click started a sign-in. The form advances to it when Python
 // reports signed in, and forgets it once a flow it saw running has ended.
 let pendingAdvance = null;
+// Dismissed for as long as Painter runs; the window is reused between opens.
+let updateDismissed = false;
 
 let catalog = [];
 
@@ -465,6 +467,15 @@ function render(json) {
   if (showingSettings) $("page-form").hidden = true;
   $("settingsBtn").hidden = s.page !== "form" || showingSettings;
 
+  // Asked once, before the form; either answer leads straight to it.
+  const askingUsage = s.page === "form" && !s.usageAsked;
+  $("page-usage").hidden = !askingUsage;
+  if (askingUsage) {
+    $("page-form").hidden = true;
+    $("page-settings").hidden = true;
+    $("settingsBtn").hidden = true;
+  }
+
   // Clear the form only when Python says a NEW export started. Keying this on
   // "the page just became the form" is wrong in both directions: a second
   // export while already on the form would keep the previous asset's name and
@@ -501,6 +512,7 @@ function render(json) {
 
   const auth = applyDestination(s) || {};
   paintStatus(s);
+  paintUpdate(s);
   // Expired or signed out while the form was open: the row is where sign-in
   // lives now, so that is where to be.
   const current = entry(destination());
@@ -575,6 +587,7 @@ function measuredHeight() {
    is gated on it. */
 function applySettings(settings) {
   $("revealExports").checked = settings.revealExports;
+  $("shareUsage").checked = settings.shareUsage;
   $("exportFolderPath").textContent = settings.exportRoot;
   $("resetFolderBtn").hidden = settings.exportRoot === settings.defaultRoot;
   reportHeight();
@@ -651,6 +664,7 @@ function wireSettings() {
   $("revealExports").addEventListener("change", (e) => {
     bridge.setRevealExports(e.target.checked);
   });
+  $("shareUsage").addEventListener("change", (e) => bridge.setShareUsage(e.target.checked));
 
   // Both return the root now in effect, so neither needs a second round trip.
   $("chooseFolderBtn").addEventListener("click", () => {
@@ -661,7 +675,26 @@ function wireSettings() {
   });
 }
 
+function paintUpdate(s) {
+  $("update").hidden = !s.update || updateDismissed;
+  if (s.update) $("updateText").textContent = `Miris ${s.update.version} is available.`;
+}
+
 function wire() {
+  for (const [id, on] of [["usageShare", true], ["usageDecline", false]]) {
+    $(id).addEventListener("click", () => {
+      $("page-usage").hidden = true;  // Python's push then shows the form
+      bridge.setShareUsage(on);
+    });
+  }
+  $("updateDownload").addEventListener("click", () => {
+    bridge.openExternal(JSON.parse(lastState).update.url);
+  });
+  $("updateDismiss").addEventListener("click", () => {
+    updateDismissed = true;
+    $("update").hidden = true;
+    reportHeight();
+  });
   $("noticeDismiss").addEventListener("click", () => {
     $("notice").hidden = true;  // gone now; Python's next push confirms it
     bridge.dismissNotice();
@@ -674,6 +707,7 @@ function wire() {
   $("keepExports").addEventListener("change", (e) => bridge.setKeepExports(e.target.checked));
   // The window sizes itself to its content, so a fold must report its height.
   $("advanced").addEventListener("toggle", reportHeight);
+  $("usageDetails").addEventListener("toggle", reportHeight);
   unitDropdown = createDropdown($("unitDropdown"), () => {});
   workspaceDropdown = createDropdown($("workspaceDropdown"), (value) => {
     const id = destination();

@@ -42,6 +42,11 @@
 <main>
 
 <section id="page-form" hidden>
+  <div id="update" class="notice" data-tone="note" hidden>
+    <span id="updateText" class="notice-text"></span>
+    <button id="updateDownload" class="notice-action" type="button">Download</button>
+    <button id="updateDismiss" class="notice-dismiss" type="button" title="Dismiss" aria-label="Dismiss"><svg viewBox="0 0 16 16" aria-hidden="true" width="12" height="12"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M4 4l8 8M12 4l-8 8"/></svg></button>
+  </div>
   <div id="notice" class="notice" data-tone="note" hidden>
     <span id="noticeText" class="notice-text"></span>
     <button id="noticeDismiss" class="notice-dismiss" type="button" title="Dismiss" aria-label="Dismiss"><svg viewBox="0 0 16 16" aria-hidden="true" width="12" height="12"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M4 4l8 8M12 4l-8 8"/></svg></button>
@@ -107,6 +112,22 @@
   </div>
 </section>
 
+<section id="page-usage" class="usage-page" hidden>
+  <h2>Help make Miris better?</h2>
+  <p>Anonymous usage stats show us what breaks and what to build next, so fixes reach you sooner. Never your name, files or projects.</p>
+  <div class="row">
+    <button id="usageShare" class="btn-secondary" type="button">Share</button>
+    <button id="usageDecline" class="btn-secondary" type="button">Don't share</button>
+  </div>
+  <div class="usage-foot">
+    <details class="advanced" id="usageDetails">
+      <summary>What's shared</summary>
+      <p>The buttons you click, whether exports and uploads work, file sizes, and your plugin, Painter and system versions.</p>
+    </details>
+    <span>Change it later in Settings</span>
+  </div>
+</section>
+
 <section id="page-settings" hidden>
   <button id="settingsBackBtn" class="btn-back" type="button">
     <svg viewBox="0 0 16 16" aria-hidden="true" width="12" height="12">
@@ -135,6 +156,17 @@
         Change
       </button>
     </div>
+  </div>
+
+  <div class="field">
+    <label class="check">
+      <input id="shareUsage" type="checkbox">
+      <span>
+        Share anonymous usage data
+        <small>Tells Miris which features get used and what fails. Never
+          your name, account, files, or projects.</small>
+      </span>
+    </label>
   </div>
 </section>
 

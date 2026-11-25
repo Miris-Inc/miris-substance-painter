@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from PySide6 import QtCore
 
+from .. import telemetry
 from ..connectors import Cancelled
 
 
@@ -130,6 +131,7 @@ class ConnectionManager(QtCore.QObject):
         self._verifying.discard(destination)
         self._expired.discard(destination)
         after = connector.sign_out()
+        telemetry.track("lifecycle", "sign-out", destination=destination)
         self.changed.emit(destination)
         if after is None:
             return
@@ -155,6 +157,12 @@ class ConnectionManager(QtCore.QObject):
         self._say(destination, "")
         self.hide_login.emit()
         self._log(f"signed in to {self._title(destination)}")
+        from .. import destinations
+
+        mechanism = ((destinations.by_id(destination) or {}).get("auth") or {}).get("mechanism", "")
+        telemetry.track(
+            "lifecycle", "sign-in", method=mechanism.replace("_", "-"), destination=destination
+        )
         self.changed.emit(destination)
         self.verify(destination)
 
@@ -167,6 +175,7 @@ class ConnectionManager(QtCore.QObject):
             self._say(destination, f"{self._title(destination)} sign-in cancelled.")
         else:
             self._log(f"{self._title(destination)} sign-in failed: {exc}", error=True)
+            telemetry.track("error", "error", code=f"sign-in-{type(exc).__name__}")
             self._say(destination, self.get(destination).human_error(exc), "error")
         self.changed.emit(destination)
 

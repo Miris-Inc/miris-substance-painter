@@ -466,6 +466,23 @@ body.dialog .notice-dismiss {
   border-radius: 50%;
   cursor: default;
 }
+body.dialog .usage-page h2 { margin: 6px 0 0; font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: var(--text); }
+body.dialog .usage-page > p { margin-top: 6px; font-size: 13px; line-height: 1.5; color: var(--dim); }
+body.dialog .usage-page .row { margin-top: 20px; }
+body.dialog .usage-foot { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 12px; color: var(--dim); }
+body.dialog .usage-foot details { flex: 1; min-width: 0; }
+body.dialog .usage-foot details p { margin: 6px 0 0; line-height: 1.5; }
+body.dialog .notice-action {
+  flex: none;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  background: none;
+  border: 0;
+  cursor: default;
+}
+body.dialog .notice-action:hover { text-decoration: underline; }
+body.dialog .notice-action:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 body.dialog .notice-dismiss:hover { opacity: 1; background: rgba(255, 255, 255, 0.08); }
 body.dialog .notice-dismiss:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 

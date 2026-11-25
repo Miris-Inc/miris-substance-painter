@@ -26,9 +26,11 @@ def start_plugin():
     import substance_painter.ui
     from PySide6 import QtGui, QtWidgets
 
+    from . import telemetry
     from .ui.window import PublishWindowController
 
     _log_startup()
+    telemetry.track("lifecycle", "enable")
     _menu = QtWidgets.QMenu("Miris")
     _menu.addAction("Publish…", _publish)
     _menu.addSeparator()
@@ -43,6 +45,7 @@ def start_plugin():
 
 
 def _publish():
+    _click("publish")
     if _controller is None:
         _tell("Miris isn't ready. Try reloading the plugin from this menu.")
         return
@@ -58,6 +61,7 @@ def _publish():
 
 def _show_about():
     global _about
+    _click("about")
     try:
         if _about is None:
             import substance_painter.ui
@@ -69,6 +73,12 @@ def _show_about():
     except Exception:  # noqa: BLE001 (a menu action must not fail silently)
         _log_error("could not open the About window")
         _tell("Couldn't open the About window. See Painter's log for details.")
+
+
+def _click(control):
+    from . import telemetry
+
+    telemetry.track("interaction", "click", control=control, view="miris-menu")
 
 
 def _project_is_open() -> bool:
@@ -96,6 +106,10 @@ def close_plugin():
     menu behind for the next start to duplicate."""
     global _menu, _controller, _about
     import substance_painter.ui
+
+    from . import telemetry
+
+    telemetry.track("lifecycle", "disable")
 
     if _about is not None:
         about, _about = _about, None
